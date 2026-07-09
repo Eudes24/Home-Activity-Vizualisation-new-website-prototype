@@ -1,0 +1,17 @@
+.placeholder-page {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.placeholder-body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 300px;
+  border: 1px dashed var(--color-border-tertiary);
+  border-radius: var(--border-radius-lg);
+  color: var(--color-text-secondary);
+  font-size: 13px;
+}
