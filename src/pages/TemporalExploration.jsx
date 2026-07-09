@@ -19,6 +19,17 @@ import './TemporalExploration.css'
 const TABS = ['Weekly view', 'Day view', 'Monthly view', 'Yearly view']
 const totals = weeklyTotals()
 
+function DeltaIndicator({ minutes, avg }) {
+  const positive = minutes >= 0
+  return (
+    <span className="metric-delta">
+      <span className={`delta-arrow ${positive ? 'up' : 'down'}`}>{positive ? '↑' : '↓'}</span>
+      {positive ? '+' : ''}{minutes} min
+      <span> · {avg}</span>
+    </span>
+  )
+}
+
 export default function TemporalExploration() {
   const [activeTab, setActiveTab] = useState('Weekly view')
   const [selectedEvent, setSelectedEvent] = useState(null)
@@ -40,37 +51,26 @@ export default function TemporalExploration() {
         <div className="temporal-empty">This view is not built yet.</div>
       ) : (
         <>
-          <div className="metric-row-with-selector">
-            <div className="metric-row">
-              <div className="metric-card">
-                <div className="metric-label">Sleep</div>
-                <div className="metric-value">{sleepMetrics.duration.value}</div>
-                <div className="metric-sub">{sleepMetrics.duration.delta} · {sleepMetrics.duration.avg}</div>
-              </div>
-              <div className="metric-card">
-                <div className="metric-label">Bedtime</div>
-                <div className="metric-value">{sleepMetrics.bedtime.value}</div>
-                <div className="metric-sub">{sleepMetrics.bedtime.delta} · {sleepMetrics.bedtime.avg}</div>
-              </div>
-              <div className="metric-card">
-                <div className="metric-label">Wake time</div>
-                <div className="metric-value">{sleepMetrics.wakeTime.value}</div>
-                <div className="metric-sub">{sleepMetrics.wakeTime.delta} · {sleepMetrics.wakeTime.avg}</div>
-              </div>
-              <div className="metric-card">
-                <div className="metric-label">Awakenings</div>
-                <div className="metric-value">{sleepMetrics.awakenings.value}</div>
-                <div className="metric-sub">{sleepMetrics.awakenings.delta} · {sleepMetrics.awakenings.avg}</div>
-              </div>
+          <div className="metric-row">
+            <div className="metric-card">
+              <div className="metric-label">Sleep</div>
+              <div className="metric-value">{sleepMetrics.duration.value}</div>
+              <div className="metric-sub"><DeltaIndicator minutes={sleepMetrics.duration.deltaMinutes} avg={sleepMetrics.duration.avg} /></div>
             </div>
-            <div className="activity-selector">
-              <span className="activity-selector-label">SLEEP</span>
-              <div className="activity-selector-dots">
-                <span className="activity-dot active" style={{ background: ACTIVITY_TYPES.sleep.color }} />
-                <span className="activity-dot" />
-                <span className="activity-dot" />
-                <span className="activity-dot" />
-              </div>
+            <div className="metric-card">
+              <div className="metric-label">Bedtime</div>
+              <div className="metric-value">{sleepMetrics.bedtime.value}</div>
+              <div className="metric-sub"><DeltaIndicator minutes={sleepMetrics.bedtime.deltaMinutes} avg={sleepMetrics.bedtime.avg} /></div>
+            </div>
+            <div className="metric-card">
+              <div className="metric-label">Wake time</div>
+              <div className="metric-value">{sleepMetrics.wakeTime.value}</div>
+              <div className="metric-sub"><DeltaIndicator minutes={sleepMetrics.wakeTime.deltaMinutes} avg={sleepMetrics.wakeTime.avg} /></div>
+            </div>
+            <div className="metric-card">
+              <div className="metric-label">Awakenings</div>
+              <div className="metric-value">{sleepMetrics.awakenings.value}</div>
+              <div className="metric-sub"><DeltaIndicator minutes={sleepMetrics.awakenings.deltaMinutes} avg={sleepMetrics.awakenings.avg} /></div>
             </div>
           </div>
 

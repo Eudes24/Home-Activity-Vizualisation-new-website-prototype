@@ -5,6 +5,25 @@ import { ACTIVITY_TYPES, IDLE_COLOR } from '../../pages/temporalWeekData.js'
 
 const ROW_HEIGHT = 30
 const ROW_GAP = 10
+const CAP_RADIUS = ROW_HEIGHT / 2
+
+function segmentPath(x0, x1, y, h, roundLeft, roundRight) {
+  const r = Math.min(CAP_RADIUS, h / 2, Math.max(0, x1 - x0) / 2)
+  const rl = roundLeft ? r : 0
+  const rr = roundRight ? r : 0
+  return [
+    `M${x0 + rl},${y}`,
+    `L${x1 - rr},${y}`,
+    rr ? `A${rr},${rr} 0 0 1 ${x1},${y + rr}` : '',
+    `L${x1},${y + h - rr}`,
+    rr ? `A${rr},${rr} 0 0 1 ${x1 - rr},${y + h}` : '',
+    `L${x0 + rl},${y + h}`,
+    rl ? `A${rl},${rl} 0 0 1 ${x0},${y + h - rl}` : '',
+    `L${x0},${y + rl}`,
+    rl ? `A${rl},${rl} 0 0 1 ${x0 + rl},${y}` : '',
+    'Z',
+  ].filter(Boolean).join(' ')
+}
 
 export default function WeeklyTimelineChart({ weekData, selected, onSelect }) {
   const [containerRef, { width, height }] = useChartSize()
@@ -30,6 +49,7 @@ export default function WeeklyTimelineChart({ weekData, selected, onSelect }) {
     weekData.forEach((dayRow, i) => {
       const y = i * (ROW_HEIGHT + ROW_GAP)
       const isSelectedDay = selected && selected.day === dayRow.label
+      const lastIndex = dayRow.segments.length - 1
 
       root.append('text')
         .attr('x', -10).attr('y', y + ROW_HEIGHT / 2)
@@ -37,20 +57,12 @@ export default function WeeklyTimelineChart({ weekData, selected, onSelect }) {
         .attr('font-size', '11px').attr('fill', 'var(--color-text-secondary)')
         .text(dayRow.label)
 
-      const clipId = `day-clip-${i}`
-      root.append('clipPath').attr('id', clipId)
-        .append('rect').attr('x', 0).attr('y', y).attr('width', w).attr('height', ROW_HEIGHT).attr('rx', ROW_HEIGHT / 2)
-
-      const g = root.append('g').attr('clip-path', `url(#${clipId})`)
-
-      g.selectAll('rect')
+      root.selectAll(null)
         .data(dayRow.segments)
-        .enter().append('rect')
-        .attr('x', (s) => x(s.start))
-        .attr('y', y)
-        .attr('width', (s) => Math.max(0, x(s.end) - x(s.start)))
-        .attr('height', ROW_HEIGHT)
+        .enter().append('path')
+        .attr('d', (s, idx) => segmentPath(x(s.start), x(s.end), y, ROW_HEIGHT, idx === 0, idx === lastIndex))
         .attr('fill', (s) => (s.type === 'idle' ? IDLE_COLOR : ACTIVITY_TYPES[s.type].color))
+        .attr('class', (s) => (s.type === 'idle' ? '' : 'segment-interactive'))
         .attr('stroke', (s) => (isSelectedDay && selected.start === s.start && selected.type === s.type ? 'var(--color-text-primary)' : 'none'))
         .attr('stroke-width', 2)
         .style('cursor', (s) => (s.type === 'idle' ? 'default' : 'pointer'))

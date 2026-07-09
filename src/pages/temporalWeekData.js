@@ -175,10 +175,10 @@ export function weeklyTotals() {
 export const transitionsThisWeek = 214
 
 export const sleepMetrics = {
-  duration: { value: '7h47', delta: '-32 min', avg: 'avg 8h19' },
-  bedtime: { value: '23:28', delta: '+30 min', avg: 'avg 22:58' },
-  wakeTime: { value: '07:18', delta: '+6 min', avg: 'avg 07:12' },
-  awakenings: { value: '14', delta: '+6 min', avg: 'avg 2/night' },
+  duration: { value: '7h47', deltaMinutes: -32, avg: 'avg 8h19' },
+  bedtime: { value: '23:28', deltaMinutes: 30, avg: 'avg 22:58' },
+  wakeTime: { value: '07:18', deltaMinutes: 6, avg: 'avg 07:12' },
+  awakenings: { value: '14', deltaMinutes: 6, avg: 'avg 2/night' },
 }
 
 export const anomalies = [{ label: 'Missed meal', detail: 'Friday', color: ACTIVITY_TYPES.meals.color }]

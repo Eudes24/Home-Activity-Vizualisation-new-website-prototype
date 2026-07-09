@@ -16,13 +16,7 @@
   font-size: 13px;
 }
 
-.metric-row-with-selector {
-  display: flex;
-  gap: 10px;
-}
-
 .metric-row {
-  flex: 1;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 10px;
@@ -55,44 +49,23 @@
   margin-top: 4px;
 }
 
-.activity-selector {
-  width: 52px;
-  flex-shrink: 0;
-  background: var(--color-background-secondary);
-  border-radius: var(--border-radius-md);
-  display: flex;
-  flex-direction: column;
+.metric-delta {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 10px;
-  padding: 10px 0;
+  gap: 3px;
 }
 
-.activity-selector-label {
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  color: var(--color-text-secondary);
+.delta-arrow {
+  font-size: 11px;
+  line-height: 1;
 }
 
-.activity-selector-dots {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+.delta-arrow.up {
+  color: #3b6d11;
 }
 
-.activity-dot {
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  border: 1.5px solid var(--color-border-secondary);
-  background: transparent;
-}
-
-.activity-dot.active {
-  border-color: transparent;
+.delta-arrow.down {
+  color: #a32d2d;
 }
 
 .temporal-main-row {
@@ -148,6 +121,11 @@
   display: block;
   width: 100%;
   overflow: visible;
+}
+
+.chart-box.timeline .segment-interactive:hover {
+  stroke: var(--color-text-primary);
+  stroke-width: 2.5px;
 }
 
 .temporal-side-col {
@@ -269,18 +247,7 @@
   .temporal-main-row {
     grid-template-columns: 1fr;
   }
-  .metric-row-with-selector {
-    flex-direction: column;
-  }
-  .activity-selector {
-    width: 100%;
-    flex-direction: row;
-  }
-  .activity-selector-label {
-    writing-mode: horizontal-tb;
-    transform: none;
-  }
-  .activity-selector-dots {
-    flex-direction: row;
+  .metric-row {
+    grid-template-columns: repeat(2, 1fr);
   }
 }
