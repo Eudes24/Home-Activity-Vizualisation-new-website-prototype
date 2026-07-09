@@ -6,6 +6,7 @@ export default function TopBar({
   dateRange,
   pageTitle,
   pills = [],
+  rightStats = [],
   tabs = [],
   activeTab,
   onTabChange,
@@ -17,10 +18,12 @@ export default function TopBar({
         <div className="top-bar-left">
           <span className="top-bar-label">Participant</span>
           <span className="participant-badge">{participant}</span>
-          <span className="period-badge">
-            <CalendarIcon style={{ marginRight: 4, verticalAlign: -1 }} />
-            {dateRange}
-          </span>
+          {dateRange && (
+            <span className="period-badge">
+              <CalendarIcon style={{ marginRight: 4, verticalAlign: -1 }} />
+              {dateRange}
+            </span>
+          )}
           {pageTitle && <span className="page-title">{pageTitle}</span>}
         </div>
         <div className="top-bar-right">
@@ -30,6 +33,12 @@ export default function TopBar({
               {pill.type === 'success' && <CheckIcon />}
               {pill.label}
             </span>
+          ))}
+          {rightStats.map((stat) => (
+            <div key={stat.label} className="top-bar-stat">
+              <span className="top-bar-stat-label">{stat.label}</span>
+              <span className="top-bar-stat-value">{stat.value}</span>
+            </div>
           ))}
         </div>
       </div>

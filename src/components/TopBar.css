@@ -55,7 +55,27 @@
 
 .top-bar-right {
   display: flex;
-  gap: 8px;
+  align-items: center;
+  gap: 20px;
+}
+
+.top-bar-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.top-bar-stat-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.top-bar-stat-value {
+  font-size: 12px;
+  font-weight: 400;
+  font-style: italic;
+  color: var(--color-text-secondary);
 }
 
 .pill {
