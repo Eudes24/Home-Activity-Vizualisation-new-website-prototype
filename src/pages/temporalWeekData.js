@@ -54,6 +54,7 @@ export const weekLabel = 'Week 21'
 export const weekData = [
   {
     label: 'Monday',
+    date: new Date(2016, 10, 14),
     segments: day([
       { start: 0, end: 6.5, type: 'sleep' },
       { start: 6.5, end: 6.65, type: 'bathroom' },
@@ -69,6 +70,7 @@ export const weekData = [
   },
   {
     label: 'Tuesday',
+    date: new Date(2016, 10, 15),
     segments: day([
       { start: 0, end: 6.2, type: 'sleep' },
       { start: 6.2, end: 6.35, type: 'bathroom' },
@@ -84,6 +86,7 @@ export const weekData = [
   },
   {
     label: 'Wednesday',
+    date: new Date(2016, 10, 16),
     segments: day([
       { start: 0, end: 6.4, type: 'sleep' },
       { start: 6.4, end: 6.55, type: 'bathroom' },
@@ -97,6 +100,7 @@ export const weekData = [
   },
   {
     label: 'Thursday',
+    date: new Date(2016, 10, 17),
     segments: day([
       { start: 0, end: 6.3, type: 'sleep' },
       { start: 6.3, end: 6.45, type: 'bathroom' },
@@ -110,6 +114,7 @@ export const weekData = [
   },
   {
     label: 'Friday',
+    date: new Date(2016, 10, 18),
     segments: day([
       { start: 0, end: 6.6, type: 'sleep' },
       { start: 6.6, end: 6.75, type: 'bathroom' },
@@ -122,6 +127,7 @@ export const weekData = [
   },
   {
     label: 'Saturday',
+    date: new Date(2016, 10, 19),
     segments: day([
       { start: 0, end: 5.6, type: 'sleep' },
       { start: 5.6, end: 5.75, type: 'bathroom' },
@@ -135,6 +141,7 @@ export const weekData = [
   },
   {
     label: 'Sunday',
+    date: new Date(2016, 10, 20),
     segments: day([
       { start: 0, end: 6.35, type: 'sleep' },
       { start: 6.35, end: 6.5, type: 'bathroom' },
@@ -146,6 +153,61 @@ export const weekData = [
     ]),
   },
 ]
+
+export function fmtDayDate(date) {
+  return date.toLocaleDateString('en-US', { day: 'numeric', month: 'short' })
+}
+
+export function fmtISODate(date) {
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
+}
+
+const ISO_DATE_RE = /^(\d{4})-(\d{2})-(\d{2})$/
+
+export function parseISODate(text) {
+  const match = ISO_DATE_RE.exec(text.trim())
+  if (!match) return null
+  const year = Number(match[1])
+  const month = Number(match[2])
+  const day = Number(match[3])
+  const date = new Date(year, month - 1, day)
+  if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) return null
+  return date
+}
+
+export function sameDate(a, b) {
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate()
+}
+
+export function isoWeekNumber(date) {
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
+  const dayNum = (d.getUTCDay() + 6) % 7
+  d.setUTCDate(d.getUTCDate() - dayNum + 3)
+  const firstThursday = new Date(Date.UTC(d.getUTCFullYear(), 0, 4))
+  return 1 + Math.round(((d - firstThursday) / 86400000 - 3 + ((firstThursday.getUTCDay() + 6) % 7)) / 7)
+}
+
+// The participant's overall monitoring period, reused across pages (Meal preparation, Raw detection dashboard).
+export const periodStart = new Date(2016, 10, 1)
+export const periodEnd = new Date(2017, 11, 31)
+
+// Every real day we authored (Nov 14-20, 2016) covers a distinct weekday, so it doubles as a
+// weekday activity template reused for any other date within the monitoring period.
+const weekdayTemplates = {}
+for (const d of weekData) weekdayTemplates[d.date.getDay()] = d.segments
+
+export function dayInfoForDate(date) {
+  const exact = weekData.find((d) => sameDate(d.date, date))
+  if (exact) return exact
+  return {
+    label: date.toLocaleDateString('en-US', { weekday: 'long' }),
+    date,
+    segments: weekdayTemplates[date.getDay()],
+  }
+}
 
 export function fmtTime(hoursFloat) {
   const h = Math.floor(hoursFloat)
@@ -174,6 +236,13 @@ export function weeklyTotals() {
 
 export const transitionsThisWeek = 214
 
+// Monday..Sunday, reused for any date by its weekday when browsing outside the authored week.
+export const dailyTransitions = [28, 31, 24, 27, 22, 35, 26]
+
+export function transitionsForDate(date) {
+  return dailyTransitions[(date.getDay() + 6) % 7]
+}
+
 export const sleepMetrics = {
   duration: { value: '7h47', deltaMinutes: -32, avg: 'avg 8h19' },
   bedtime: { value: '23:28', deltaMinutes: 30, avg: 'avg 22:58' },
@@ -181,4 +250,40 @@ export const sleepMetrics = {
   awakenings: { value: '14', deltaMinutes: 6, avg: 'avg 2/night' },
 }
 
-export const anomalies = [{ label: 'Missed meal', detail: 'Friday', color: ACTIVITY_TYPES.meals.color }]
+export const anomalies = [
+  { label: 'Missed meal', detail: 'Friday, Nov 18', date: new Date(2016, 10, 18), color: ACTIVITY_TYPES.meals.color },
+]
+
+export function dayTotals(segments) {
+  const totals = { sleep: 0, meals: 0, outings: 0, bathroom: 0 }
+  for (const seg of segments) {
+    if (seg.type === 'idle') continue
+    totals[seg.type] += seg.end - seg.start
+  }
+  return totals
+}
+
+export function daySleepMetrics(segments) {
+  const sleepSegs = segments.filter((s) => s.type === 'sleep')
+  const wakeSeg = sleepSegs[0]
+  const bedSeg = sleepSegs[sleepSegs.length - 1]
+  const duration = sleepSegs.reduce((sum, s) => sum + (s.end - s.start), 0)
+  const wakeTime = wakeSeg ? wakeSeg.end : 0
+  const bedtime = bedSeg ? bedSeg.start : 24
+  const awakenings = segments.filter(
+    (s) => s.type === 'bathroom' && (s.end <= wakeTime || s.start >= bedtime)
+  ).length
+  return { duration, wakeTime, bedtime, awakenings }
+}
+
+export const weeklyDayMetrics = weekData.map((d) => daySleepMetrics(d.segments))
+
+export const avgDayMetrics = weeklyDayMetrics.reduce(
+  (acc, m) => ({
+    duration: acc.duration + m.duration / weeklyDayMetrics.length,
+    wakeTime: acc.wakeTime + m.wakeTime / weeklyDayMetrics.length,
+    bedtime: acc.bedtime + m.bedtime / weeklyDayMetrics.length,
+    awakenings: acc.awakenings + m.awakenings / weeklyDayMetrics.length,
+  }),
+  { duration: 0, wakeTime: 0, bedtime: 0, awakenings: 0 }
+)
